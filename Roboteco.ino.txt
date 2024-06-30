@@ -1,0 +1,276 @@
+/***   Included libraries  ***/
+#include <BitbloqUS.h>
+#include <Servo.h>
+
+/***   Global variables and function definition  ***/
+uint8_t pupila_der = 2;
+uint8_t pupila_izq = 11;
+US nariz(6, 5);
+uint8_t infrarrojos_der = 3;
+uint8_t infrarrojos_izq = 9;
+Servo ceja_der;
+Servo ceja_izq;
+Servo ojo_der;
+Servo ojo_izq;
+uint8_t zumbador = 8;
+uint8_t boton = 4;
+uint8_t potenciometro = A4;
+uint8_t sensor_de_luz = A5;
+float pulsador = 0;
+float distancia = 0;
+float infra_der = 0;
+float infra_izq = 0;
+float pagina = 0;
+float pagina_para = 1;
+float escala = 0;
+bool boton_pulsado = false;
+float T0 = 0;
+float T1 = 0;
+float T2 = 0;
+float T3 = 0;
+float Tiempo_pulsado = 1000;
+float Cuenta = 0;
+float Cuenta2 = 0;
+
+/***   Setup  ***/
+void setup() {
+    pinMode(pupila_der, OUTPUT);
+    pinMode(pupila_izq, OUTPUT);
+    pinMode(infrarrojos_der, INPUT);
+    pinMode(infrarrojos_izq, INPUT);
+    ceja_der.attach(7);
+    ceja_izq.attach(10);
+    ojo_der.attach(1);
+    ojo_izq.attach(12);
+    pinMode(zumbador, OUTPUT);
+    pinMode(boton, INPUT);
+    pinMode(potenciometro, INPUT);
+    pinMode(sensor_de_luz, INPUT);
+    digitalWrite(pupila_der, HIGH);
+    digitalWrite(pupila_izq, HIGH);
+    ceja_der.write(90);
+    ceja_izq.write(90);
+}
+
+/***   Loop  ***/
+void loop() {
+    pulsador = digitalRead(boton);
+    distancia = nariz.read();
+    infra_der = digitalRead(infrarrojos_der);
+    infra_izq = digitalRead(infrarrojos_izq);
+    escala = analogRead(potenciometro);
+    pagina = (infra_der + infra_izq);
+    if ((pagina > 0)) {
+        pagina_para = 0;
+    }
+    else {
+        if (pagina_para == 0) {
+            pagina_para = 1;
+            tone(zumbador, 494, 100);
+            delay(100);
+            delay(100);
+            tone(zumbador, 494, 100);
+            delay(100);
+            digitalWrite(pupila_der, LOW);
+            digitalWrite(pupila_izq, LOW);
+            ojo_der.write(180);
+            ojo_izq.write(0);
+            tone(zumbador, 261, 100);
+            delay(100);
+            digitalWrite(pupila_der, HIGH);
+            digitalWrite(pupila_izq, HIGH);
+            ceja_der.write(75);
+            ceja_izq.write(105);
+            delay(100);
+            ceja_der.write(90);
+            ceja_izq.write(90);
+            ojo_der.write(90);
+            ojo_izq.write(90);
+        }
+    }
+    if (((boton_pulsado == false) && digitalRead(boton))) {
+        boton_pulsado = true;
+        T0 = millis();
+        T1 = 0;
+    }
+    if (((boton_pulsado == true) && !digitalRead(boton))) {
+        boton_pulsado = false;
+        T1 = millis();
+        Tiempo_pulsado = (T1 - T0);
+    }
+    if (Tiempo_pulsado != 0) {
+        T2 = millis();
+        T0 = 0;
+        T1 = 0;
+        if (Tiempo_pulsado < 1000) {
+            Cuenta = (Cuenta + 1);
+        }
+        else {
+            Cuenta = 0;
+        }
+        Tiempo_pulsado = 0;
+    }
+    if ((millis() - T2) > 1000) {
+        T2 = millis();
+        Cuenta2 = 0;
+        while (Cuenta != 0) {
+            digitalWrite(pupila_der, LOW);
+            digitalWrite(pupila_izq, LOW);
+            ojo_der.write(180);
+            ojo_izq.write(0);
+            delay(200);
+            ojo_der.write(90);
+            ojo_izq.write(90);
+            digitalWrite(pupila_der, HIGH);
+            digitalWrite(pupila_izq, HIGH);
+            if (Cuenta2 == 0) {
+                tone(zumbador, 261, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 1) {
+                tone(zumbador, 293, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 2) {
+                tone(zumbador, 329, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 3) {
+                tone(zumbador, 349, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 4) {
+                tone(zumbador, 392, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 5) {
+                tone(zumbador, 440, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 6) {
+                tone(zumbador, 494, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 7) {
+                tone(zumbador, 277, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 8) {
+                tone(zumbador, 311, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 9) {
+                tone(zumbador, 370, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 10) {
+                tone(zumbador, 415, 1000);
+                delay(1000);
+            }
+            if (Cuenta2 == 11) {
+                tone(zumbador, 466, 1000);
+                delay(1000);
+            }
+            digitalWrite(pupila_der, HIGH);
+            digitalWrite(pupila_izq, HIGH);
+            Cuenta2 = (Cuenta2 + 1);
+            Cuenta = (Cuenta - 1);
+        }
+    }
+    if (distancia <= 40) {
+        digitalWrite(pupila_der, LOW);
+        digitalWrite(pupila_izq, LOW);
+        if (distancia > 35) {
+            tone(zumbador, 261, 1100);
+            delay(1100);
+        }
+        else {
+            if (distancia > 30) {
+                tone(zumbador, 293, 950);
+                delay(950);
+            }
+            else {
+                if (distancia > 25) {
+                    tone(zumbador, 329, 800);
+                    delay(800);
+                }
+                else {
+                    if (distancia > 20) {
+                        tone(zumbador, 349, 650);
+                        delay(650);
+                    }
+                    else {
+                        if (distancia > 15) {
+                            tone(zumbador, 392, 500);
+                            delay(500);
+                        }
+                        else {
+                            if (distancia > 10) {
+                                tone(zumbador, 440, 350);
+                                delay(350);
+                            }
+                            else {
+                                if (distancia > 5) {
+                                    tone(zumbador, 494, 200);
+                                    delay(200);
+                                }
+                                else {
+                                    tone(zumbador, 277, 50);
+                                    delay(50);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        ceja_der.write(75);
+        ceja_izq.write(105);
+        digitalWrite(pupila_der, HIGH);
+        digitalWrite(pupila_izq, HIGH);
+        delay((distancia * 10));
+        ceja_der.write(90);
+        ceja_izq.write(90);
+    }
+    else {
+        if (escala < 100) {
+            
+        }
+        else if (escala < 200) {
+            tone(zumbador, 261, 100);
+            delay(100);
+        }
+        else if (escala < 300) {
+            tone(zumbador, 293, 100);
+            delay(100);
+        }
+        else if (escala < 400) {
+            tone(zumbador, 329, 100);
+            delay(100);
+        }
+        else if (escala < 500) {
+            tone(zumbador, 349, 100);
+            delay(100);
+        }
+        else if (escala < 600) {
+            tone(zumbador, 392, 100);
+            delay(100);
+        }
+        else if (escala < 700) {
+            tone(zumbador, 440, 100);
+            delay(100);
+        }
+        else if (escala < 800) {
+            tone(zumbador, 494, 100);
+            delay(100);
+        }
+        else if (escala < 900) {
+            tone(zumbador, 523, 100);
+            delay(100);
+        }
+        ojo_der.write(90);
+        ojo_izq.write(90);
+        digitalWrite(pupila_der, HIGH);
+        digitalWrite(pupila_izq, HIGH);
+    }
+}
